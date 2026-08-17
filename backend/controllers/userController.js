@@ -1,7 +1,7 @@
 import User from "../models/UserModel.js"
 import jwt from 'jsonwebtoken'
-
-const signup = async(req, res)=> {
+import Product from "../models/ProductModel.js"
+const signup = async (req, res) => {
     try {
         const { email, password, confirmPassword } = req.body;
         if (!email || !password || !confirmPassword) {
@@ -24,7 +24,7 @@ const signup = async(req, res)=> {
     }
 }
 
-const login = async(req, res) => {
+const login = async (req, res) => {
     try {
         const { email, password } = req.body;
         if (!email || !password) {
@@ -52,17 +52,50 @@ const login = async(req, res) => {
     }
 }
 
-const logout = async(req,res) => {
-     res.clearCookie("jwt", {
+const logout = async (req, res) => {
+    res.clearCookie("jwt", {
         httpOnly: true,
         sameSite: "lax",
         secure: false
     });
     res.status(200).json({ message: "Logout successful" });
 }
+const addtocart = async (req, res) => {
+    try {
+        const { id } = req.body
+        const userId = req.user.userId;
+        const user = await User.findById(userId);
+        const product = await Product.findById(id);
+
+        const cartItem = user.cart.find(
+            (item) => item.product.toString() === product._id.toString()
+        );
+
+        if (cartItem) {
+            cartItem.quantity += 1;
+        } else {
+            user.cart.push({
+                product: product._id,
+                quantity: 1
+            });
+        }
+        await user.save();
+        return res.status(200).json({
+            message: "Product added to cart",
+            cart: user.cart
+        });
+    }
+    catch (error) {
+        return res.status(500).json({
+            message: "Could not add product to cart",
+            error: error.message
+        })
+    }
+}
 
 export {
     signup,
     login,
-    logout
+    logout,
+    addtocart
 };

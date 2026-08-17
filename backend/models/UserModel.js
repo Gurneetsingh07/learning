@@ -12,7 +12,21 @@ const UserModel = new mongoose.Schema({
     password: {
         type: String,
         required: true,
+    },
+    cart: [
+    {
+        product: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Products",
+            required: true
+        },
+        quantity: {
+            type: Number,
+            default: 1,
+            min: 1
+        }
     }
+]
 }, { timestamps: true })
 
 UserModel.pre('save', async function (next) {

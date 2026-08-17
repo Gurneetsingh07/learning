@@ -27,7 +27,7 @@ const Navbar = () => {
 
     const handleLogout = async () => {
         try {
-            const res = await fetch("http://localhost:5000/logout", { method: "POST", credentials: "include" });
+            const res = await fetch("/user/logout", { method: "POST", credentials: "include" });
             const data = await res.json();
             if (res.ok) {
                 navigate("/login")

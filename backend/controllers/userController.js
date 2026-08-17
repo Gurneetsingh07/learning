@@ -1,4 +1,5 @@
 import User from "../models/UserModel.js"
+import jwt from 'jsonwebtoken'
 
 const signup = async(req, res)=> {
     try {
@@ -50,3 +51,18 @@ const login = async(req, res) => {
         res.status(500).json({ message: "server error during login", error: error.message })
     }
 }
+
+const logout = async(req,res) => {
+     res.clearCookie("jwt", {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: false
+    });
+    res.status(200).json({ message: "Logout successful" });
+}
+
+export {
+    signup,
+    login,
+    logout
+};

@@ -1,12 +1,39 @@
-
-import { useDispatch, useSelector } from 'react-redux';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { removeCartItem } from '../features/slices/cartSlice';
-
+import cookies from "js-cookie";
 const Cart = () => {
     const navigate = useNavigate();
-    const dispatch = useDispatch();
-    const cartItems = useSelector((state) => state.cart.value.cartItems) || [];
+    const [cartItems, setCartItems] = useState([]);
+
+    const getCartItems = async () => {
+        const token = cookies.get('jwt');
+        if (!token) {
+            alert("please login first");
+            navigate("/login");
+            return;
+        }
+        try {
+            const res = await fetch("user/cart", {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            const data = await res.json();
+            if (res.ok) {
+                console.log(data.cart)
+                setCartItems(data.cart || []);
+            }
+        }
+        catch (error) {
+            alert("could not connect to the server")
+        }
+    };
+
+    useEffect(() => {
+        console.log("useEffect")
+        getCartItems();
+    }, []);
 
     const handleButtonClick = () => {
         navigate('/')
@@ -21,7 +48,6 @@ const Cart = () => {
                     <p>{item.price}</p>
                     <p>{item.itemsCount}</p>
                     <button onClick={() => {
-                        dispatch(removeCartItem(item));
                     }}>Delete</button>
                 </div>
             ))}

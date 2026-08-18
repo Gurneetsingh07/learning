@@ -1,14 +1,15 @@
 
 import { useEffect } from 'react'
+import Cookies from "js-cookie"
 import { useSelector, useDispatch } from 'react-redux';
 import { addProduct } from '../features/slices/productSlice.js';
 import { setTotalPages } from '../features/slices/paginationSlice.js';
-import { setCartItems } from '../features/slices/cartSlice.js';
+
 
 const Products = () => {
     const dispatch = useDispatch();
     const productsState = useSelector((state) => state.product.value);
-    const cartItems = useSelector((state) => state.cart.value.cartItems) || [];
+
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -20,6 +21,30 @@ const Products = () => {
         fetchProducts()
     }, [])
 
+    const handleAddToCart = async (product) => {
+        const token = Cookies.get('jwt');
+        if (!token) {
+            alert("Please login first");
+            return;
+        }
+        try {
+            const response = await fetch("/user/cart", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    id: product._id
+                })
+            });
+             await response.json();
+
+        }
+        catch (error) {
+            console.log(error)
+        }
+    }
     return (
         <>
             {productsState.products.map((product) => (
@@ -27,9 +52,9 @@ const Products = () => {
                     <h1>{product.name}</h1>
                     <p>{product.category}</p>
                     <p>{product.price}</p>
-                    <button onClick={() => {
-                        dispatch(setCartItems({ cartItems: { ...product, itemsCount: 1 } }));
-                    }}>add to cart {cartItems.itemsCount}</button>
+                    <button onClick={() => handleAddToCart(product)}>
+                        Add to cart
+                    </button>
                 </div>
             ))}
 

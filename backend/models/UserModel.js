@@ -14,19 +14,42 @@ const UserModel = new mongoose.Schema({
         required: true,
     },
     cart: [
-    {
-        product: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Products",
-            required: true
-        },
-        quantity: {
-            type: Number,
-            default: 1,
-            min: 1
+        {
+            product: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "Products",
+                required: true
+            },
+            name: {
+                type: String,
+                required: true
+            },
+            category: {
+                type: String
+            },
+            price: {
+                type: Number,
+                required: true
+            },
+            rating: {
+                type: Number
+            },
+
+            stock: {
+                type: Number
+            },
+
+            image: {
+                type: String
+            },
+            quantity: {
+                type: Number,
+                default: 1,
+                min: 1
+            },
+
         }
-    }
-]
+    ]
 }, { timestamps: true })
 
 UserModel.pre('save', async function (next) {

@@ -1,18 +1,12 @@
 import React, { useEffect } from 'react'
 import SearchProducts from './searchProducts'
 import { useNavigate } from 'react-router-dom'
-import { useSelector } from 'react-redux'
+
 import Cookies from 'js-cookie';
 
 const Navbar = () => {
     const navigate = useNavigate();
     const jwtToken = Cookies.get('jwt');
-
-    const cartItems = useSelector((state) => state.cart.value.cartItems) || [];
-    let count = 0;
-    cartItems.forEach((item) => {
-        count = count + item.itemsCount;
-    });
 
     const handleButtonClick = () => {
         navigate('/cart')
@@ -43,7 +37,7 @@ const Navbar = () => {
     return (
         <>
             <SearchProducts />
-            <button onClick={handleButtonClick}>cart {count}</button>
+            <button onClick={handleButtonClick} disabled={!jwtToken}>cart</button>
             {jwtToken ? (
                 <button onClick={handleLogout}>Logout</button>
             ) : (

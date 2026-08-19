@@ -1,10 +1,10 @@
-import React, { useEffect } from 'react'
+import React, { useState} from 'react'
 import SearchProducts from './searchProducts'
 import { useNavigate } from 'react-router-dom'
 
 import Cookies from 'js-cookie';
 
-const Navbar = () => {
+const Navbar = ({ totalCartItems }) => {
     const navigate = useNavigate();
     const jwtToken = Cookies.get('jwt');
 
@@ -37,7 +37,7 @@ const Navbar = () => {
     return (
         <>
             <SearchProducts />
-            <button onClick={handleButtonClick} disabled={!jwtToken}>cart</button>
+            <button onClick={handleButtonClick} disabled={!jwtToken}>{`cart${totalCartItems}`}</button>
             {jwtToken ? (
                 <button onClick={handleLogout}>Logout</button>
             ) : (

@@ -62,30 +62,31 @@ const logout = async (req, res) => {
 }
 const addtocart = async (req, res) => {
     try {
-        console.log("inside add to cart")
         const { id } = req.body
         const userId = req.user.userId;
         const user = await User.findById(userId);
         const product = await Product.findById(id);
 
-        const cartItem = user.cart.find(
-            (item) => item.product.toString() === product._id.toString()
-        );
-        if (cartItem) {
-            cartItem.quantity += 1;
-        } else {
-            user.cart.push({
-                product: product._id,
-                name: product.name,
-                category: product.category,
-                price: product.price,
-                rating: product.rating,
-                stock: product.stock,
-                image: product.image,
-                quantity: 1
-            });
+        if (product) {
+            const cartItem = user.cart.find(
+                (item) => item.product.toString() === product._id.toString()
+            );
+            if (cartItem) {
+                cartItem.quantity += 1;
+            } else {
+                user.cart.push({
+                    product: product._id,
+                    name: product.name,
+                    category: product.category,
+                    price: product.price,
+                    rating: product.rating,
+                    stock: product.stock,
+                    image: product.image,
+                    quantity: 1
+                });
+            }
+            await user.save();
         }
-        await user.save();
         return res.status(200).json({
             message: "Product added to cart",
             cart: user.cart
@@ -118,10 +119,43 @@ const getcartitem = async (req, res) => {
         });
     }
 }
+const deleteCartItem = async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        const { productId } = req.params;
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found"
+            });
+        }
+        const itemIndex = user.cart.findIndex(
+            (item) => item.product.toString() === productId
+        );
+        if (user.cart[itemIndex].quantity > 1) {
+            user.cart[itemIndex].quantity -= 1;
+        } else {
+            user.cart.splice(itemIndex, 1);
+        }
+
+        await user.save();
+        return res.status(200).json({
+            message: "Cart item updated successfully",
+            cart: user.cart
+        })
+    }
+    catch (error) {
+        return res.status(500).json({
+            message: "could not delete the cart item",
+            error: error.message
+        });
+    }
+}
 export {
     signup,
     login,
     logout,
     addtocart,
-    getcartitem
+    getcartitem,
+    deleteCartItem
 };

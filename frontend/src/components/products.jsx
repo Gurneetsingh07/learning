@@ -6,7 +6,7 @@ import { addProduct } from '../features/slices/productSlice.js';
 import { setTotalPages } from '../features/slices/paginationSlice.js';
 
 
-const Products = () => {
+const Products = ({ setTotalCartItems }) => {
     const dispatch = useDispatch();
     const productsState = useSelector((state) => state.product.value);
 
@@ -19,6 +19,7 @@ const Products = () => {
             dispatch(setTotalPages(data.totalPages));
         }
         fetchProducts()
+        handleAddToCart()
     }, [])
 
     const handleAddToCart = async (product) => {
@@ -35,11 +36,11 @@ const Products = () => {
                     Authorization: `Bearer ${token}`
                 },
                 body: JSON.stringify({
-                    id: product._id
+                    id: product?._id
                 })
             });
-             await response.json();
-
+            const data = await response.json();
+            setTotalCartItems(data.cart.reduce((acc, product) => acc + product.quantity, 0))
         }
         catch (error) {
             console.log(error)

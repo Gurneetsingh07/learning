@@ -1,19 +1,28 @@
+import redisClient from "../config/redis.js";
 import Product from "../models/ProductModel.js"
 
 const getAllProducts = async (req, res) => {
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 10;
+    const cacheKey = `products:page:${page}:limit:${limit}`;
+    const cachedProducts = await redisClient.get(cacheKey);
+    if (cachedProducts) {
+        console.log("Products sent from Redis cache");
+        return res.json(JSON.parse(cachedProducts));
+    }
     const startIndex = (page - 1) * limit;
     const products = await Product.find()
         .skip(startIndex)
         .limit(limit);
     const productsLength = await Product.countDocuments();
-    res.json({
-        products: products,
-        productsLength: productsLength,
+    const response = {
+        products,
+        productsLength,
         currentPage: page,
-        totalPages: Math.ceil(productsLength / limit)
-    });
+        totalPages: Math.ceil(productsLength / limit),
+    };
+    await redisClient.setEx(cacheKey, 300, JSON.stringify(response));
+    res.json(response);
 }
 
 const addNewProduct = async (req, res) => {

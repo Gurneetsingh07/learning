@@ -1,6 +1,7 @@
 import User from "../models/UserModel.js"
 import jwt from 'jsonwebtoken'
 import Product from "../models/ProductModel.js"
+
 const signup = async (req, res) => {
     try {
         const { email, password, confirmPassword } = req.body;
@@ -14,7 +15,7 @@ const signup = async (req, res) => {
         if (userExists) {
             return res.status(400).json({ message: "User already exists" });
         }
-        const newUser = new User({ email, password });
+        const newUser = new User({ email, password, role: "user" });
         await newUser.save();
 
         res.status(201).json({ message: "User registered successfully" });
@@ -40,7 +41,8 @@ const login = async (req, res) => {
             return res.status(400).json({ message: "Invalid email or password" });
         }
         const token = jwt.sign(
-            { userId: user._id, email: user.email },
+            { userId: user._id, email: user.email, role: user.role },
+
             process.env.JWT_SECRET,
             { expiresIn: '1h' }
         );
